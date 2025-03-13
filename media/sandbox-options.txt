@@ -1,0 +1,50 @@
+VERSION = 1,
+
+option MoveableDoors.WoodworkReqXP
+{
+	type = integer, min = 0, max = 10, default = 5,
+	page = MoveableDoors, translation = MoveableDoors_WoodworkReqXP,
+}
+
+option MoveableDoors.MetalWeldingReqXP
+{
+	type = integer, min = 0, max = 10, default = 3,
+	page = MoveableDoors, translation = MoveableDoors_MetalWeldingReqXP,
+}
+
+option MoveableDoors.MustHaveKey
+{
+	type = boolean, default = false,
+	page = MoveableDoors, translation = MoveableDoors_MustHaveKey,
+}
+
+option MoveableDoors.DismantleDuration
+{
+	type = double, min = 0, max = 5000, default = 200,
+	page = MoveableDoors, translation = MoveableDoors_DismantleDuration,
+}
+option MoveableDoors.TimeReductionBonus
+{
+	type = integer, min = 0, max = 250, default = 3,
+	page = MoveableDoors, translation = MoveableDoors_TimeReductionBonus,
+}
+
+option MoveableDoors.SuccessRate
+{
+	type = double, min = 0, max = 100, default = 45,
+	page = MoveableDoors, translation = MoveableDoors_SuccessRate,
+}
+option MoveableDoors.SuccessRateBonus
+{
+	type = double, min = 0, max = 5, default = 3,
+	page = MoveableDoors, translation = MoveableDoors_SuccessRateBonus,
+}
+
+
+
+
+option MoveableDoors.CanChangeKeyId
+{
+	type = boolean, default = true,
+	page = MoveableDoors, translation = MoveableDoors_CanChangeKeyId,
+}

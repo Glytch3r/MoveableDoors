@@ -1,0 +1,48 @@
+module Base {
+
+
+
+	model GarageDoorPackage
+	{
+		mesh 				= 		WorldItems/Mattress,
+		texture 			= 		WorldItems/GarageDoorPackage,
+		scale 				= 		0.22,
+	}
+
+
+	model DoubleDoorPackage
+	{
+		mesh 				= 		WorldItems/Mattress,
+		texture 			= 		WorldItems/DoubleDoorPackage,
+		scale 				= 		0.22,
+	}
+
+	item GarageDoorPackage
+	{
+		PackedSpr			= 		walls_garage_01_1,
+		DisplayName		    = 		Garage Door Package,
+		Icon			    = 		GarageDoorPackage,
+		DisplayCategory 	= 		Security,
+		Type              	= 		Normal,
+		Weight			    = 		2.5,
+		WorldStaticModel 	= 		GarageDoorPackage,
+		MetalValue 			= 		5,
+		Tooltip 			= 		Hold The Door!,
+	}
+
+	item DoubleDoorPackage
+	{
+		PackedSpr			= 		fixtures_doors_fences_01_64,
+		DisplayName		    = 		Double Door Package,
+		Icon			    = 		DoubleDoorPackage,
+		DisplayCategory 	= 		Security,
+		Type              	= 		Normal,
+		Weight			    = 		2,
+		WorldStaticModel 	= 		DoubleDoorPackage,
+		MetalValue 			= 		4,
+		Tooltip 			= 		Hold The Door!,
+
+	}
+
+
+}

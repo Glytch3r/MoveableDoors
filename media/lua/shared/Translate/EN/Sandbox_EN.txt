@@ -1,0 +1,27 @@
+Sandbox_EN = {
+    Sandbox_MoveableDoors = "Moveable Doors",
+
+    Sandbox_MoveableDoors_WoodworkReqXP = "Required Carpentry Level",
+    Sandbox_MoveableDoors_WoodworkReqXP_tooltip = "Minimum Woodwork level Required to be able to Pickup Double Doors and Garage Doors",
+
+    Sandbox_MoveableDoors_MetalWeldingReqXP = "Required MetalWelding Level",
+    Sandbox_MoveableDoors_MetalWeldingReqXP_tooltip = "Minimum MetalWelding level Required to be able to Pickup Double Doors and Garage Doors",
+
+    Sandbox_MoveableDoors_MustHaveKey = "Must Have Key",
+    Sandbox_MoveableDoors_MustHaveKey_tooltip = "Must have Original Key to be able to Pickup Double Doors and Garage Doors",
+
+    Sandbox_MoveableDoors_DismantleDuration = "Dismantle Duration",
+    Sandbox_MoveableDoors_DismantleDuration_tooltip = "Time it take to dismantle Double Doors and Garage Doors",
+
+    Sandbox_MoveableDoors_TimeReductionBonus = "Time Reduction Bonus",
+    Sandbox_MoveableDoors_TimeReductionBonus_tooltip = "Time Reduction Bonus is based on Woodwork and MetalWelding Level",
+
+    Sandbox_MoveableDoors_SuccessRate = "Success Rate",
+    Sandbox_MoveableDoors_SuccessRate_tooltip = "Set to 0 to disable feature. Set to 100 to guarantee Success",
+
+    Sandbox_MoveableDoors_SuccessRateBonus = "Success Rate Bonus",
+    Sandbox_MoveableDoors_SuccessRateBonus_tooltip = "Success Rate Bonus is based on Woodwork and MetalWelding Level",
+
+
+
+}
