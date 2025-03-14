@@ -30,16 +30,16 @@ MoveableDoors=MoveableDoors or {}
 -----------------------            ---------------------------
 require "TimedActions/ISBaseTimedAction"
 
-ISMoveableDoorsAction = ISBaseTimedAction:derive("ISMoveableDoorsAction")
+MoveableDoorsAction = ISBaseTimedAction:derive("MoveableDoorsAction")
 
 local function predicateNotBroken(item)
     return not item:isBroken()
 end
-function ISMoveableDoorsAction:update()
+function MoveableDoorsAction:update()
     self.character:faceThisObject(self.door)
 end
 
-function ISMoveableDoorsAction:isValid()
+function MoveableDoorsAction:isValid()
     local reqKey = SandboxVars.MoveableDoors.MustHaveKey or false
     if ( reqKey and  MoveableDoors.haveDoorKey(self.door, self.character)) or
     (not reqKey and MoveableDoors.hasSkills(self.character))  then
@@ -48,17 +48,17 @@ function ISMoveableDoorsAction:isValid()
     end
 end
 
-function ISMoveableDoorsAction:start()
+function MoveableDoorsAction:start()
     self:setActionAnim("Loot")
     self.character:PlayAnim("Loot")
     self.character:SetVariable("LootPosition", "Mid")
 end
 
-function ISMoveableDoorsAction:stop()
+function MoveableDoorsAction:stop()
     ISBaseTimedAction.stop(self)
 end
 
-function ISMoveableDoorsAction:perform()
+function MoveableDoorsAction:perform()
 
 
     local roll = self:doRoll()
@@ -95,7 +95,7 @@ function ISMoveableDoorsAction:perform()
     ISBaseTimedAction.perform(self)
 end
 
-function ISMoveableDoorsAction:new(character, door, time)
+function MoveableDoorsAction:new(character, door, time)
     local o = {}
     setmetatable(o, self)
     self.__index = self
@@ -110,7 +110,7 @@ function ISMoveableDoorsAction:new(character, door, time)
     return o
 end
 
-function ISMoveableDoorsAction:doRoll()
+function MoveableDoorsAction:doRoll()
     local SuccessRate = SandboxVars.MoveableDoors.SuccessRate or 15
     local boost = SandboxVars.MoveableDoors.SuccessRateBonus or 3
     local roll = math.max(0, math.min(100, SuccessRate + (boost * self.LevelMult)))
@@ -120,7 +120,7 @@ function ISMoveableDoorsAction:doRoll()
 end
 
 
-function ISMoveableDoorsAction:waitToStart()
+function MoveableDoorsAction:waitToStart()
     self.character:faceThisObject(self.door)
     return self.character:shouldBeTurning()
 end

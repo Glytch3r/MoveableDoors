@@ -201,15 +201,16 @@ function MoveableDoors.context(player, context, worldobjects, test)
 	if sq then
         local door = MoveableDoors.getDoor(sq)
         if door then
-            local optTip = opt:addOption('Take Door', worldobjects, function()
+            local optTip = context:addOptionOnTop('Take Door', worldobjects, function()
                 if luautils.walkAdj(pl, sq) then
                     ISTimedActionQueue.add(ISWalkToTimedAction:new(pl, sq));
                 end
                 local time =  MoveableDoors.getMaxTime()
-                ISTimedActionQueue.add(ISMoveableDoorsAction:new(pl, sq));
+                ISTimedActionQueue.add(MoveableDoorsAction:new(pl, sq));
                 getSoundManager():playUISound("UIActivateMainMenuItem")
                 context:hideAndChildren()
             end)
+            optTip.iconTexture = getTexture("media/ui/HodorIcon.png")
             if not (MoveableDoors.isGarageDoor(door) or MoveableDoors.isDoubleDoor(door)) then
                 optTip.notAvailable = true
             end
