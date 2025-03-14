@@ -126,22 +126,6 @@ function MoveableDoors.isGarageDoor(door)
     return isGarageDoor
 end ]]
 
-function MoveableDoors.getMaxTime()
-    local pl = getPlayer()
-    local WoodworkLevel = pl:getPerkLevel(Perks.Woodwork)
-    local MetalWeldingLevel = pl:getPerkLevel(Perks.MetalWelding)
-
-    local requiredLevel1 = SandboxVars.MoveableDoors.WoodworkReqXP or 5
-    local requiredLevel2 = SandboxVars.MoveableDoors.MetalWeldingReqXP or 3
-    local dur            = SandboxVars.MoveableDoors.DismantleDuration or 200
-
-    local LevelMult = (math.max(0, WoodworkLevel - requiredLevel1)) + (math.max(0, MetalWeldingLevel - requiredLevel2))
-	local TimeReductionBonus = SandboxVars.MoveableDoors.TimeReductionBonus or 3
-    dur = dur - (TimeReductionBonus * LevelMult)
-	return  dur
-end
-
-
 
 function MoveableDoors.doorRemoved(door)
     local props = door:getSprite():getProperties()
@@ -195,31 +179,7 @@ function MoveableDoors.isDoubleDoor(obj)
     return obj and obj:getProperties() and obj:getProperties():Is("DoubleDoor")
 end
 
-function MoveableDoors.context(player, context, worldobjects, test)
-	local pl = getSpecificPlayer(player)
-	local sq = clickedSquare
-	if sq then
-        local door = MoveableDoors.getDoor(sq)
-        if door then
-            local optTip = context:addOptionOnTop('Take Door', worldobjects, function()
-                if luautils.walkAdj(pl, sq) then
-                    ISTimedActionQueue.add(ISWalkToTimedAction:new(pl, sq));
-                end
-                local time =  MoveableDoors.getMaxTime()
-                ISTimedActionQueue.add(MoveableDoorsAction:new(pl, sq));
-                getSoundManager():playUISound("UIActivateMainMenuItem")
-                context:hideAndChildren()
-            end)
-            optTip.iconTexture = getTexture("media/ui/HodorIcon.png")
-            if not (MoveableDoors.isGarageDoor(door) or MoveableDoors.isDoubleDoor(door)) then
-                optTip.notAvailable = true
-            end
-        end
 
-	end
-end
-Events.OnFillWorldObjectContextMenu.Remove(MoveableDoors.context)
-Events.OnFillWorldObjectContextMenu.Add(MoveableDoors.context)
 
 
 -----------------------            ---------------------------
