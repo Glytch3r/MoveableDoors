@@ -170,12 +170,59 @@ function MoveableDoors.invContext(player, context, items)
         context:addOptionOnTop(cap, nil, function()
             local sprName = MoveableDoors.getDoorItemSprName(doorItem)
             local altSprName = MoveableDoors.getAltFace(sprName, isGarage)
+
+
+            -----------------------            ---------------------------
+            function removeEvents()
+                ISMoveableCursor.exitCursorKey()
+                Events.OnMouseUp.Remove(OnMouseUpCursor)
+                Events.OnKeyPressed.Remove(removeEvents)
+                Events.OnKeyKeepPressed.Remove(removeEvents)
+                Events.OnRightMouseDown.Remove(removeEvents)
+              --  cursor = nil
+               -- getCell():setDrag(nil, 0)
+                ISMoveableCursor.clearCacheForAllPlayers()
+            end
+
+            local function setSprCursor()
+                local pl = getPlayer()
+                local cursor = ISBrushToolTileCursor:new(sprName, altSprName, pl)
+                getCell():setDrag(cursor, pl:getPlayerNum())
+
+                local function OnMouseUpCursor(x, y)
+                    timer:Simple(0.2, function()
+                        --cursor = nil
+                        doorItem:getContainer():Remove(doorItem)
+                        --getCell():setDrag(nil, 0)
+                        ISMoveableCursor.exitCursorKey()
+                        removeEvents()
+                        ISMoveableCursor.clearCacheForAllPlayers()
+                    end)
+                end
+                Events.OnMouseUp.Add(OnMouseUpCursor)
+                Events.OnKeyPressed.Add(removeEvents);
+                Events.OnKeyKeepPressed.Add(removeEvents);
+                Events.OnRightMouseDown.Add(removeEvents);
+
+
+
+            end
+
+            setSprCursor()
+
+
+            -----------------------            ---------------------------
+            --[[
             local cursor = ISBrushToolTileCursor:new(sprName, altSprName, pl)
-            getCell():setDrag(cursor, 0)
-            pl:getInventory():Remove(doorItem)
-            ISInventoryPage.renderDirty = true
-            ISInventoryPage.dirtyUI()
-            ISMoveableCursor.clearCacheForAllPlayers()
+            if getCell():setDrag(cursor, 0) then
+            --pl:getInventory():Remove(doorItem)
+                doorItem:getContainer():Remove(doorItem)
+                ISInventoryPage.renderDirty = true
+                ISInventoryPage.dirtyUI()
+                ISMoveableCursor.clearCacheForAllPlayers()
+            end
+ ]]
+
         end)
     end
 end

@@ -37,12 +37,6 @@ MoveableDoors = MoveableDoors or {}
  ]]
 --  inv:haveThisKeyId(padlockedThump:getKeyId())
 
-function MoveableDoors.hasSkills(pl)
-    pl = pl or getPlayer()
-    local WoodworkReqXP = SandboxVars.MoveableDoors.WoodworkReqXP or 5
-    local MetalWeldingReqXP = SandboxVars.MoveableDoors.MetalWeldingReqXP or 3
-    return WoodworkReqXP <= pl:getPerkLevel(Perks.Woodwork) and MetalWeldingReqXP <= pl:getPerkLevel(Perks.MetalWelding)
-end
 -----------------------            ---------------------------
 
 function MoveableDoors.setKeyId(door)
@@ -87,12 +81,6 @@ function MoveableDoors.getDoorItemSprName(doorItem)
     return nil
 end
 
-function MoveableDoors.haveDoorKey(door, pl)
-    pl = pl or getPlayer()
-    local KeyId = instanceof(door, "IsoDoor") and door:checkKeyId() or door:getKeyId()
-    return pl:getInventory():haveThisKeyId(KeyId)
-end
-
 function MoveableDoors.haveDoorItemKey(doorItem, pl)
     return pl:getInventory():haveThisKeyId(MoveableDoors.getDoorItemKeyId(doorItem))
 end
@@ -125,7 +113,7 @@ function MoveableDoors.isGarageDoor(door)
     local isGarageDoor = props and props:Is("GarageDoor")
     return isGarageDoor
 end ]]
-
+--[[
 
 function MoveableDoors.doorRemoved(door)
     local props = door:getSprite():getProperties()
@@ -163,7 +151,7 @@ function MoveableDoors.doorRemoved(door)
     if MoveableDoors.hasAccess(door, getPlayer())  then
     end
 end
-
+ ]]
 --Events.OnTileRemoved.Add(MoveableDoors.doorRemoved)
 --Events.OnObjectAboutToBeRemoved.Add(MoveableDoors.doorRemoved)
 
