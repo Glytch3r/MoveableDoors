@@ -43,6 +43,13 @@ option MoveableDoors.SuccessRateBonus
 
 
 
+option MoveableDoors.debug
+{
+	type = boolean, default = false,
+	page = MoveableDoors, translation = MoveableDoors_debug,
+}
+
+
 option MoveableDoors.CanChangeKeyId
 {
 	type = boolean, default = true,

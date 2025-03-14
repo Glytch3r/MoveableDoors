@@ -131,8 +131,8 @@ function MoveableDoors.invContext(player, context, items)
             end
         end
     end
-
-    if keyItem and (SandboxVars.MoveableDoors.CanChangeKeyId or getCore():getDebug()) then
+    local canChangeId = SandboxVars.MoveableDoors.CanChangeKeyId or true
+    if keyItem and (canChangeId or getCore():getDebug()) then
         if MoveableDoors.hasValidKeysInHands(pl) then
             local sc = pl:getSecondaryHandItem()
             local pr = pl:getPrimaryHandItem()
@@ -154,14 +154,14 @@ function MoveableDoors.invContext(player, context, items)
             if optCopyKeyLeft and sc and sc:getKeyId() == -1 then
                 optCopyKeyLeft.notAvailable = true
                 local tip = ISInventoryPaneContextMenu.addToolTip()
-                tip.description = "Invalid Id Left Hand Key"
+                tip.description = "Invalid Left Hand Key Id"
                 optCopyKeyLeft.toolTip = tip
             end
 
             if optCopyKeyRight and pr and pr:getKeyId() == -1 then
                 optCopyKeyRight.notAvailable = true
                 local tip = ISInventoryPaneContextMenu.addToolTip()
-                tip.description = "Invalid Id Right Hand Key"
+                tip.description = "Invalid Right Hand Key Id"
                 optCopyKeyRight.toolTip = tip
             end
         end

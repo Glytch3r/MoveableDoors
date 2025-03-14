@@ -22,6 +22,7 @@ Sandbox_EN = {
     Sandbox_MoveableDoors_SuccessRateBonus = "Success Rate Bonus",
     Sandbox_MoveableDoors_SuccessRateBonus_tooltip = "Success Rate Bonus is based on Woodwork and MetalWelding Level",
 
-
+    Sandbox_MoveableDoors_debug = "Admin Debug",
+    Sandbox_MoveableDoors_CanChangeKeyId = "Can Change Key Id",
 
 }
