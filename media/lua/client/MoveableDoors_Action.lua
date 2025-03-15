@@ -124,16 +124,22 @@ function MoveableDoorsAction:perform()
 
     for _, obj in ipairs(doorParts) do
         local spr = obj:getSprite()
-        local sprName = spr and spr:getName() or "Unknown"
+        local sprName = spr and spr:getName() or "walls_garage_01_1"
         local sq =  obj:getSquare()
         MoveableDoorsAction.doSledge(obj)
-        --[[
+    --[[
         sq:transmitRemoveItemFromSquare(obj)
         obj:getCell():removeIsoObject(obj)
- ]]
+    ]]
         local doorItem = sq:AddWorldInventoryItem(toSpawn, 0.5, 0.5, 0)
         if doorItem then
-            doorItem:getModData()["PackedSpr"] = sprName
+            doorItem:getModData()["PackedSpr"] = tostring(sprName)
+            doorItem:setName(tostring(sprName))
+            if isGarageDoor then
+                doorItem:setTooltip(tostring("GarageDoorPackage"))
+            else
+                doorItem:setTooltip(tostring("DoubleDoorPackage"))
+            end
         end
     end
     self.character:playSound("RemoveBarricadeMetal")
@@ -227,8 +233,7 @@ function MoveableDoors.context(player, context, worldobjects, test)
 	if sq then
         local door = MoveableDoors.getDoor(sq)
         if door then
-            local optTip = context:addOptionOnTop('Take Door', worldobjects, function()
-
+            local optTip = context:addOptionOnTop(getText("ContextMenu_MoveableDoors_TakeDoor"), worldobjects, function()
                 if luautils.walkAdj(pl, sq) then
                     --ISTimedActionQueue.add(ISWalkToTimedAction:new(pl, sq));
                     MoveableDoors.crowbar(pl)
@@ -238,15 +243,42 @@ function MoveableDoors.context(player, context, worldobjects, test)
                 getSoundManager():playUISound("UIActivateMainMenuItem")
             end)
 
+            local tip = ISWorldObjectContextMenu.addToolTip()
             optTip.iconTexture = getTexture("media/ui/HodorIcon.png")
-            --if not (MoveableDoors.isGarageDoor(door) or MoveableDoors.isDoubleDoor(door)) then
-           -- if not pl:getPrimaryHandItem() or not pl:getPrimaryHandItem():hasTag("Crowbar") then
-            if not (pl:getPrimaryHandItem() and  pl:getInventory():FindAndReturn("Base.Crowbar")) then
-                local tip = ISWorldObjectContextMenu.addToolTip()
-                tip.description = "Crowbar is Required"
-                optTip.toolTip = tip
+
+            local hasCrowbar = pl:getPrimaryHandItem() ~= nil and pl:getInventory():FindAndReturn("Base.Crowbar")
+            local isGarageDoor = MoveableDoors.isGarageDoor(door)
+            local canTakeDoor = MoveableDoors.canTakeDoors(pl, door)
+            local isLock = door:isLocked()
+            if not hasCrowbar then
+                tip.description = getText("ContextMenu_MoveableDoors_Crowbar")
                 optTip.notAvailable = true
             end
+            local MustHaveKey = SandboxVars.MoveableDoors.MustHaveKey
+            if not MoveableDoors.haveDoorKey(door, pl) and MustHaveKey then
+                tip.description = (tip.description and tip.description.."\n" or "") .. getText("ContextMenu_MoveableDoors_ReqKey")
+                optTip.notAvailable = true
+            end
+
+            if not isGarageDoor then
+                tip.description = (tip.description and tip.description.."\n" or "") .. getText("ContextMenu_MoveableDoors_GarageOnly")
+                optTip.notAvailable = true
+            end
+
+            if not isLock then
+                tip.description = (tip.description and tip.description.."\n" or "") .. getText("ContextMenu_MoveableDoors_Locked")
+                optTip.notAvailable = true
+            end
+
+            if not canTakeDoor then
+                tip.description = (tip.description and tip.description.."\n" or "") ..
+                    "Requires:\n Carpentry Level " .. SandboxVars.MoveableDoors.WoodworkReqXP ..
+                    "\n Metal Welding Level " .. SandboxVars.MoveableDoors.MetalWeldingReqXP
+                optTip.notAvailable = true
+            end
+
+            optTip.toolTip = tip
+
         end
 	end
 end

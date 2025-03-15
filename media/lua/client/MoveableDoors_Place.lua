@@ -94,20 +94,6 @@ function MoveableDoors.hasValidKeysInHands(pl)
     end
 end
 
---[[ function MoveableDoors.copyKeyId(pl)
-    pl = pl or getPlayer()
-    local pr = pl:getPrimaryHandItem()
-    local sc = pl:getSecondaryHandItem()
-
-    if pr and sc and MoveableDoors.isKey(pr:getFullType()) and MoveableDoors.isKey(sc:getFullType()) then
-        if pr:getKeyId() ~= -1 and sc:getKeyId() == -1 then
-            sc:setKeyId(pr:getKeyId()) -- to left
-        elseif pr:getKeyId() == -1 and sc:getKeyId() ~= -1 then
-            pr:setKeyId(sc:getKeyId()) -- to right
-        end
-    end
-    pl:getInventory():setDirty(true)
-end ]]
 function MoveableDoors.invContext(player, context, items)
     local pl = getSpecificPlayer(player)
     local isGarage = false
@@ -140,13 +126,14 @@ function MoveableDoors.invContext(player, context, items)
             local optCopyKeyLeft, optCopyKeyRight
 
             if sc and sc:getKeyId() ~= -1 then
-                optCopyKeyLeft = context:addOptionOnTop("Copy Key Id from Left hand key", nil, function()
+                optCopyKeyLeft = context:addOptionOnTop(getText("ContextMenu_MoveableDoors_FromLeft"), nil, function()
                     keyItem:setKeyId(sc:getKeyId())
                 end)
             end
 
+
             if pr and pr:getKeyId() ~= -1 then
-                optCopyKeyRight = context:addOptionOnTop("Copy Key Id from Right hand key", nil, function()
+                optCopyKeyRight = context:addOptionOnTop(getText("ContextMenu_MoveableDoors_FromRight"), nil, function()
                     keyItem:setKeyId(pr:getKeyId())
                 end)
             end
@@ -154,19 +141,20 @@ function MoveableDoors.invContext(player, context, items)
             if optCopyKeyLeft and sc and sc:getKeyId() == -1 then
                 optCopyKeyLeft.notAvailable = true
                 local tip = ISInventoryPaneContextMenu.addToolTip()
-                tip.description = "Invalid Left Hand Key Id"
+                tip.description = getText("ContextMenu_MoveableDoors_InvalidKey")
                 optCopyKeyLeft.toolTip = tip
             end
+
 
             if optCopyKeyRight and pr and pr:getKeyId() == -1 then
                 optCopyKeyRight.notAvailable = true
                 local tip = ISInventoryPaneContextMenu.addToolTip()
-                tip.description = "Invalid Right Hand Key Id"
+                tip.description = getText("ContextMenu_MoveableDoors_InvalidKey")
                 optCopyKeyRight.toolTip = tip
             end
         end
     elseif doorItem then
-        local cap = isGarage and "Place Garage Door Part" or "Place Double Door Part"
+        local cap = isGarage and getText("ContextMenu_MoveableDoors_PlaceGarageDoor") or getText("ContextMenu_MoveableDoors_PlaceGarageDoor")
         context:addOptionOnTop(cap, nil, function()
             local sprName = MoveableDoors.getDoorItemSprName(doorItem)
             local altSprName = MoveableDoors.getAltFace(sprName, isGarage)
@@ -219,6 +207,14 @@ function MoveableDoors.invContext(player, context, items)
 
 
             -----------------------            ---------------------------
+
+        end)
+    end
+end
+Events.OnFillInventoryObjectContextMenu.Remove(MoveableDoors.invContext)
+Events.OnFillInventoryObjectContextMenu.Add(MoveableDoors.invContext)
+-----------------------            ---------------------------
+
             --[[
             local cursor = ISBrushToolTileCursor:new(sprName, altSprName, pl)
             if getCell():setDrag(cursor, 0) then
@@ -230,12 +226,20 @@ function MoveableDoors.invContext(player, context, items)
             end
  ]]
 
-        end)
+--[[ function MoveableDoors.copyKeyId(pl)
+    pl = pl or getPlayer()
+    local pr = pl:getPrimaryHandItem()
+    local sc = pl:getSecondaryHandItem()
+
+    if pr and sc and MoveableDoors.isKey(pr:getFullType()) and MoveableDoors.isKey(sc:getFullType()) then
+        if pr:getKeyId() ~= -1 and sc:getKeyId() == -1 then
+            sc:setKeyId(pr:getKeyId()) -- to left
+        elseif pr:getKeyId() == -1 and sc:getKeyId() ~= -1 then
+            pr:setKeyId(sc:getKeyId()) -- to right
+        end
     end
-end
-Events.OnFillInventoryObjectContextMenu.Remove(MoveableDoors.invContext)
-Events.OnFillInventoryObjectContextMenu.Add(MoveableDoors.invContext)
------------------------            ---------------------------
+    pl:getInventory():setDirty(true)
+end ]]
 --[[
 function MoveableDoors.getPlacedDoor(sq, sprName)
     if not sq then return false end

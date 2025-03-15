@@ -25,17 +25,6 @@
    ░▒▓█████▓▒░     ░▒▓█▓▒░        ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓███████▓▒░   ░▒▓██████▓▒░   ░▒▓█▓▒░ ░▒▓█▓▒░  ░▒▓███████▓▒░    ░▒▓███████▓▒░
 █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████--]]
 MoveableDoors = MoveableDoors or {}
---[[
-    SandboxVars.MoveableDoors.WoodworkReqXP or 5
-    SandboxVars.MoveableDoors.MetalWeldingReqXP or 3
-    SandboxVars.MoveableDoors.MustHaveKey or false
-    SandboxVars.MoveableDoors.DismantleDuration or 200
-    SandboxVars.MoveableDoors.TimeReductionBonus or 3
-    SandboxVars.MoveableDoors.SuccessRate or 45
-    SandboxVars.MoveableDoors.SuccessRateBonus or 3
-    SandboxVars.MoveableDoors.CanChangeKeyId or true
- ]]
---  inv:haveThisKeyId(padlockedThump:getKeyId())
 
 -----------------------            ---------------------------
 
@@ -99,77 +88,46 @@ function MoveableDoors.setDoorItemSprName(doorItem, sprName)
 end
 
 
---[[ function MoveableDoors.isDoubleDoor(door)
-    if not door or not door:getSprite() then return false, false end
-    local props = door:getSprite():getProperties()
-    local isDoubleDoor = props and props:Is("DoubleDoor")
-    return isDoubleDoor
-end
-
-
-function MoveableDoors.isGarageDoor(door)
-    if not door or not door:getSprite() then return false, false end
-    local props = door:getSprite():getProperties()
-    local isGarageDoor = props and props:Is("GarageDoor")
-    return isGarageDoor
-end ]]
---[[
-
-function MoveableDoors.doorRemoved(door)
-    local props = door:getSprite():getProperties()
-    local isGarageDoor, isDoubleDoor
-    if instanceof(door, "IsoDoor")   then
-        local spr = door:getSprite()
-        local props spr:getProperties()
-        if props then
-            isGarageDoor = props:Is("GarageDoor")
-            isDoubleDoor = props:Is("DoubleDoor")
-        end
-        local sq = door:getSquare()
-        if not sq then
-            return
-        end
-
-        if isGarageDoor then
-            for _, doorPart in ipairs(buildUtil.getGarageDoorObjects(door)) do
-                local doorPartSprName = doorPart:getSprite():getName()
-                local spawnFType = "Base.GarageDoorPackage"
-                local doorItem = sq:AddWorldInventoryItem(tostring(spawnFType), 0.5, 0.5, 0)
-                MoveableDoors.setDoorItemSprName(doorItem, doorPartSprName)
-            end
-
-        elseif isDoubleDoor then
-            for _, doorPart in ipairs(buildUtil.getDoubleDoorObjects(door)) do
-                local doorPartSprName = doorPart:getSprite():getName()
-                local spawnFType = "Base.DoubleDoorPackage"
-                local doorItem = sq:AddWorldInventoryItem(tostring(spawnFType), 0.5, 0.5, 0)
-                MoveableDoors.setDoorItemSprName(doorItem, doorPartSprName)
-            end
-        end
-
-    end
-    if MoveableDoors.hasAccess(door, getPlayer())  then
-    end
-end
- ]]
---Events.OnTileRemoved.Add(MoveableDoors.doorRemoved)
---Events.OnObjectAboutToBeRemoved.Add(MoveableDoors.doorRemoved)
-
 
 -----------------------            ---------------------------
 
-
------------------------            ---------------------------
 function MoveableDoors.isGarageDoor(obj)
-    return obj and obj:getProperties() and obj:getProperties():Is("GarageDoor")
+    if obj then
+        local props = obj:getProperties()
+        if props then
+            return props:Is("GarageDoor")
+        end
+    end
+    return false
 end
 function MoveableDoors.isDoubleDoor(obj)
     return obj and obj:getProperties() and obj:getProperties():Is("DoubleDoor")
+end
+function MoveableDoors.isDoubleDoor(obj)
+    if obj then
+        local props = obj:getProperties()
+        if props then
+            return props:Is("DoubleDoor")
+        end
+    end
+    return false
 end
 function MoveableDoors.getBldgKeyId(sq)
     return sq:getBuilding():getDef():getKeyId()
 end
 
+
+
+function MoveableDoors.getGarageDoor(sq)
+    if not sq then return nil end
+    for i = 0, sq:getObjects():size() - 1 do
+        local obj = sq:getObjects():get(i)
+        if obj and MoveableDoors.isGarageDoor(obj) then
+            return obj
+        end
+    end
+    return nil
+end
 
 
 
@@ -324,3 +282,49 @@ Events.OnFillWorldObjectContextMenu.Add(MoveableDoors.worldContext)
 		optTip.notAvailable = true
         ]]
 
+
+
+--[[
+
+function MoveableDoors.doorRemoved(door)
+    local props = door:getSprite():getProperties()
+    local isGarageDoor, isDoubleDoor
+    if instanceof(door, "IsoDoor")   then
+        local spr = door:getSprite()
+        local props spr:getProperties()
+        if props then
+            isGarageDoor = props:Is("GarageDoor")
+            isDoubleDoor = props:Is("DoubleDoor")
+        end
+        local sq = door:getSquare()
+        if not sq then
+            return
+        end
+
+        if isGarageDoor then
+            for _, doorPart in ipairs(buildUtil.getGarageDoorObjects(door)) do
+                local doorPartSprName = doorPart:getSprite():getName()
+                local spawnFType = "Base.GarageDoorPackage"
+                local doorItem = sq:AddWorldInventoryItem(tostring(spawnFType), 0.5, 0.5, 0)
+                MoveableDoors.setDoorItemSprName(doorItem, doorPartSprName)
+            end
+
+        elseif isDoubleDoor then
+            for _, doorPart in ipairs(buildUtil.getDoubleDoorObjects(door)) do
+                local doorPartSprName = doorPart:getSprite():getName()
+                local spawnFType = "Base.DoubleDoorPackage"
+                local doorItem = sq:AddWorldInventoryItem(tostring(spawnFType), 0.5, 0.5, 0)
+                MoveableDoors.setDoorItemSprName(doorItem, doorPartSprName)
+            end
+        end
+
+    end
+    if MoveableDoors.hasAccess(door, getPlayer())  then
+    end
+end
+ ]]
+--Events.OnTileRemoved.Add(MoveableDoors.doorRemoved)
+--Events.OnObjectAboutToBeRemoved.Add(MoveableDoors.doorRemoved)
+
+
+-----------------------            ---------------------------

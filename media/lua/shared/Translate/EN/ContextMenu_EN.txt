@@ -1,4 +1,13 @@
 ContextMenu_EN = {
 	ContextMenu_MoveableDoors = "Moveable Doors",
-
+	ContextMenu_MoveableDoors_Crowbar = "Crowbar is Required",
+	ContextMenu_MoveableDoors_GarageOnly = "Only Works With Garage Doors",
+	ContextMenu_MoveableDoors_TakeDoor = "Take Garage Door",
+	ContextMenu_MoveableDoors_ReqKey = "Original Key is Required",
+	ContextMenu_MoveableDoors_FromLeft = "Copy Key Id from Left hand key",
+	ContextMenu_MoveableDoors_FromRight = "Copy Key Id from Right hand key",
+	ContextMenu_MoveableDoors_InvalidKey = "Invalid Key Id",
+	ContextMenu_MoveableDoors_PlaceGarageDoor = "Place Garage Door Part",
+	ContextMenu_MoveableDoors_PlaceDoubleDoor = "Place Double Door Part",
+	ContextMenu_MoveableDoors_Locked = "Garage Door Must not be locked",
 }

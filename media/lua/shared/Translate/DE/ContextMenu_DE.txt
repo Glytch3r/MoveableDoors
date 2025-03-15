@@ -1,0 +1,13 @@
+ContextMenu_DE = {
+    ContextMenu_MoveableDoors = "Bewegliche Türen",
+    ContextMenu_MoveableDoors_Crowbar = "Brecheisen erforderlich",
+    ContextMenu_MoveableDoors_GarageOnly = "Funktioniert nur mit Garagentoren",
+    ContextMenu_MoveableDoors_TakeDoor = "Garagentor entfernen",
+    ContextMenu_MoveableDoors_ReqKey = "Originalschlüssel erforderlich",
+    ContextMenu_MoveableDoors_FromLeft = "Schlüssel-ID von linkem Schlüssel kopieren",
+    ContextMenu_MoveableDoors_FromRight = "Schlüssel-ID von rechtem Schlüssel kopieren",
+    ContextMenu_MoveableDoors_InvalidKey = "Ungültige Schlüssel-ID",
+    ContextMenu_MoveableDoors_PlaceGarageDoor = "Garagentorteil platzieren",
+    ContextMenu_MoveableDoors_PlaceDoubleDoor = "Doppeltürteil platzieren",
+    ContextMenu_MoveableDoors_Locked = "Garagentor darf nicht verschlossen sein",
+}

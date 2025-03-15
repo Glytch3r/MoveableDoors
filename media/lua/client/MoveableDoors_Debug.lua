@@ -25,10 +25,12 @@ function MoveableDoors.getDoor(sq)
     return nil
 end
 
+
+
 function MoveableDoors.init()
     function MoveableDoors.draw()
         if SandboxVars.MoveableDoors.debug or MoveableDoors.active then
-            if not (getCore():getDebug() or  isAdmin()) then return end
+            if not  isAdmin() then return end
 
             local pl = getPlayer()
             if not pl then return end

@@ -1,0 +1,27 @@
+Sandbox_DE = {
+    Sandbox_MoveableDoors = "Bewegliche Türen",
+
+    Sandbox_MoveableDoors_WoodworkReqXP = "Erforderliches Schreinerlevel",
+    Sandbox_MoveableDoors_WoodworkReqXP_tooltip = "Minimales Schreinerlevel erforderlich. um Doppeltüren und Garagentore aufzuheben",
+
+    Sandbox_MoveableDoors_MetalWeldingReqXP = "Erforderliches Metallbearbeitungslevel",
+    Sandbox_MoveableDoors_MetalWeldingReqXP_tooltip = "Minimales Metallbearbeitungslevel erforderlich. um Doppeltüren und Garagentore aufzuheben",
+
+    Sandbox_MoveableDoors_MustHaveKey = "Schlüssel erforderlich",
+    Sandbox_MoveableDoors_MustHaveKey_tooltip = "Der Originalschlüssel ist erforderlich. um Doppeltüren und Garagentore aufzuheben",
+
+    Sandbox_MoveableDoors_DismantleDuration = "Dauer des Abbaus",
+    Sandbox_MoveableDoors_DismantleDuration_tooltip = "Zeit. die benötigt wird. um Doppeltüren und Garagentore abzubauen",
+
+    Sandbox_MoveableDoors_TimeReductionBonus = "Zeitreduktionsbonus",
+    Sandbox_MoveableDoors_TimeReductionBonus_tooltip = "Der Zeitreduktionsbonus basiert auf Schreiner- und Metallbearbeitungslevel",
+
+    Sandbox_MoveableDoors_SuccessRate = "Erfolgsrate",
+    Sandbox_MoveableDoors_SuccessRate_tooltip = "Auf 0 setzen. um die Funktion zu deaktivieren. Auf 100 setzen. um Erfolg zu garantieren",
+
+    Sandbox_MoveableDoors_SuccessRateBonus = "Erfolgsratenbonus",
+    Sandbox_MoveableDoors_SuccessRateBonus_tooltip = "Der Erfolgsratenbonus basiert auf Schreiner- und Metallbearbeitungslevel",
+
+    Sandbox_MoveableDoors_debug = "Admin-Debug",
+    Sandbox_MoveableDoors_CanChangeKeyId = "Schlüssel-ID änderbar",
+}
