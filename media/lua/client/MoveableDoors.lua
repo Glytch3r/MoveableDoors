@@ -166,6 +166,9 @@ end
 function MoveableDoors.isDoubleDoor(obj)
     return obj and obj:getProperties() and obj:getProperties():Is("DoubleDoor")
 end
+function MoveableDoors.getBldgKeyId(sq)
+    return sq:getBuilding():getDef():getKeyId()
+end
 
 
 

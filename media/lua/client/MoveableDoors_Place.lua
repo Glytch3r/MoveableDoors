@@ -173,14 +173,16 @@ function MoveableDoors.invContext(player, context, items)
 
 
             -----------------------            ---------------------------
-            function removeEvents()
-                ISMoveableCursor.exitCursorKey()
+            local function removeEvents()
                 Events.OnMouseUp.Remove(OnMouseUpCursor)
                 Events.OnKeyPressed.Remove(removeEvents)
                 Events.OnKeyKeepPressed.Remove(removeEvents)
                 Events.OnRightMouseDown.Remove(removeEvents)
-              --  cursor = nil
-               -- getCell():setDrag(nil, 0)
+                --  cursor = nil
+                --getCell():setDrag(nil, 0)
+                ISInventoryPage.dirtyUI()
+
+                ISMoveableCursor.exitCursorKey()
                 ISMoveableCursor.clearCacheForAllPlayers()
             end
 
@@ -190,14 +192,19 @@ function MoveableDoors.invContext(player, context, items)
                 getCell():setDrag(cursor, pl:getPlayerNum())
 
                 local function OnMouseUpCursor(x, y)
-                    timer:Simple(0.2, function()
-                        --cursor = nil
-                        doorItem:getContainer():Remove(doorItem)
-                        --getCell():setDrag(nil, 0)
-                        ISMoveableCursor.exitCursorKey()
+                    --cursor = nil
+                    if doorItem then
+                        local cont = doorItem:getContainer()
+                        if cont then
+                            cont:Remove(doorItem)
+
+                            if isClient() and not instanceof(doorItem:getOutermostContainer():getParent(), "IsoPlayer") and cont:getType()~="floor" then
+                                cont:removeItemOnServer(doorItem);
+                            end
+                            cont:getContainer():DoRemoveItem(doorItem);
+                        end
                         removeEvents()
-                        ISMoveableCursor.clearCacheForAllPlayers()
-                    end)
+                    end
                 end
                 Events.OnMouseUp.Add(OnMouseUpCursor)
                 Events.OnKeyPressed.Add(removeEvents);

@@ -50,26 +50,39 @@ function MoveableDoorsAction:isValid()
 end
  ]]
 function MoveableDoorsAction:isValid()
-    return true
+    return self.character:getPrimaryHandItem():hasTag("Crowbar")
 end
 
-function MoveableDoorsAction:start()
+--[[ function MoveableDoorsAction:start()
     self:setActionAnim("Loot")
     self.character:PlayAnim("Loot")
     self.character:SetVariable("LootPosition", "Mid")
 end
 
-
+ ]]
 function MoveableDoorsAction:waitToStart()
     self.character:faceThisObject(self.door)
     return self.character:shouldBeTurning()
 end
 
 
-function MoveableDoorsAction:stop()
-    ISBaseTimedAction.stop(self)
+function MoveableDoorsAction:start()
+    self:setActionAnim("RemoveBarricade")
+
+    self:setAnimVariable("RemoveBarricade", "CrowbarMid")
+    self:setOverrideHandModels(self.character:getPrimaryHandItem(), nil)
+
+    self.sound = self.character:playSound("BeginRemoveBarricadeMetal");
+    addSound(self.character, self.character:getX(), self.character:getY(), self.character:getZ(), 10, 1)
 end
 
+function MoveableDoorsAction:stop()
+	if self.sound then
+		self.character:getEmitter():stopSound(self.sound)
+		self.sound = nil
+	end
+    ISBaseTimedAction.stop(self);
+end
 function MoveableDoorsAction.doSledge(obj)
     if isClient() then
         sledgeDestroy(obj)
@@ -85,7 +98,10 @@ function MoveableDoorsAction.doSledge(obj)
 end
 
 function MoveableDoorsAction:perform()
-
+	if self.sound then
+		self.character:getEmitter():stopSound(self.sound)
+		self.sound = nil
+	end
 
     local roll = MoveableDoors.doRoll()
     if not roll then return end
@@ -103,6 +119,7 @@ function MoveableDoorsAction:perform()
         table.insert(doorParts, self.door)
     end
 
+    MoveableDoors.getDoorKey(self.character:getSquare())
     local toSpawn = isGarageDoor and "Base.GarageDoorPackage" or "Base.DoubleDoorPackage"
 
     for _, obj in ipairs(doorParts) do
@@ -119,8 +136,7 @@ function MoveableDoorsAction:perform()
             doorItem:getModData()["PackedSpr"] = sprName
         end
     end
-    local newKey = self.character:AddWorldInventoryItem("Base.Key1", 0.5, 0.5, 0)
-    newKey:setKeyId(-1)
+    self.character:playSound("RemoveBarricadeMetal")
     ISBaseTimedAction.perform(self)
 end
 
@@ -155,30 +171,6 @@ function MoveableDoors.canTakeDoors(pl, door)
     if reqKey and not MoveableDoors.haveDoorKey(door, pl) then return false end
 end
 
-function MoveableDoors.context(player, context, worldobjects, test)
-	local pl = getSpecificPlayer(player)
-	local sq = clickedSquare
-	if sq then
-        local door = MoveableDoors.getDoor(sq)
-        if door then
-            local optTip = context:addOptionOnTop('Take Door', worldobjects, function()
-                if luautils.walkAdj(pl, sq) then
-                    --ISTimedActionQueue.add(ISWalkToTimedAction:new(pl, sq));
-                    local maxTime = MoveableDoors.getMaxTime()
-                    ISTimedActionQueue.add(MoveableDoorsAction:new(pl, door, door:getSquare(), maxTime));
-                end
-                getSoundManager():playUISound("UIActivateMainMenuItem")
-            end)
-            optTip.iconTexture = getTexture("media/ui/HodorIcon.png")
-            if not (MoveableDoors.isGarageDoor(door) or MoveableDoors.isDoubleDoor(door)) then
-                optTip.notAvailable = true
-            end
-        end
-	end
-end
-Events.OnFillWorldObjectContextMenu.Remove(MoveableDoors.context)
-Events.OnFillWorldObjectContextMenu.Add(MoveableDoors.context)
-
 function MoveableDoors.getMaxTime()
     local pl = getPlayer()
     local dur            = SandboxVars.MoveableDoors.DismantleDuration or 200
@@ -208,3 +200,56 @@ function MoveableDoors.haveDoorKey(door, pl)
     local KeyId = instanceof(door, "IsoDoor") and door:checkKeyId() or door:getKeyId()
     return pl:getInventory():haveThisKeyId(KeyId)
 end
+
+function MoveableDoors.getDoorKey(sq)
+    local KeyId = -1
+    local keyItem =  sq:AddWorldInventoryItem("Base.Key"..tostring(ZombRand(1,6)), 0.5, 0.5, 0)
+    keyItem:setKeyId(KeyId)
+    ISInventoryPage.dirtyUI()
+end
+
+function MoveableDoors.crowbar(pl)
+    pl = pl or getPlayer()
+    local pr = pl:getPrimaryHandItem()
+    if pr and (pr:getType() == "Crowbar" or pr:hasTag("Crowbar"))then
+        return
+    end
+    local crowbar = pl:getInventory():FindAndReturn("Base.Crowbar")
+    if crowbar then
+        luautils.equipItems(pl, crowbar, crowbar)
+        --ISTimedActionQueue.add(ISEquipWeaponAction:new(pl, crowbar, 50, true, false))
+    end
+end
+
+function MoveableDoors.context(player, context, worldobjects, test)
+	local pl = getSpecificPlayer(player)
+	local sq = clickedSquare
+	if sq then
+        local door = MoveableDoors.getDoor(sq)
+        if door then
+            local optTip = context:addOptionOnTop('Take Door', worldobjects, function()
+
+                if luautils.walkAdj(pl, sq) then
+                    --ISTimedActionQueue.add(ISWalkToTimedAction:new(pl, sq));
+                    MoveableDoors.crowbar(pl)
+                    local maxTime = MoveableDoors.getMaxTime()
+                    ISTimedActionQueue.add(MoveableDoorsAction:new(pl, door, door:getSquare(), maxTime));
+                end
+                getSoundManager():playUISound("UIActivateMainMenuItem")
+            end)
+
+            optTip.iconTexture = getTexture("media/ui/HodorIcon.png")
+            --if not (MoveableDoors.isGarageDoor(door) or MoveableDoors.isDoubleDoor(door)) then
+           -- if not pl:getPrimaryHandItem() or not pl:getPrimaryHandItem():hasTag("Crowbar") then
+            if not (pl:getPrimaryHandItem() and  pl:getInventory():FindAndReturn("Base.Crowbar")) then
+                local tip = ISWorldObjectContextMenu.addToolTip()
+                tip.description = "Crowbar is Required"
+                optTip.toolTip = tip
+                optTip.notAvailable = true
+            end
+        end
+	end
+end
+Events.OnFillWorldObjectContextMenu.Remove(MoveableDoors.context)
+Events.OnFillWorldObjectContextMenu.Add(MoveableDoors.context)
+
