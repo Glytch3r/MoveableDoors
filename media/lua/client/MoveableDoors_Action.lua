@@ -50,7 +50,8 @@ function MoveableDoorsAction:isValid()
 end
  ]]
 function MoveableDoorsAction:isValid()
-    return self.character:getPrimaryHandItem():hasTag("Crowbar")
+    local pr = self.character:getPrimaryHandItem()
+    return pr and pr:hasTag("Crowbar") and self.isGarageDoor
 end
 
 --[[ function MoveableDoorsAction:start()
@@ -171,11 +172,11 @@ function MoveableDoors.doRoll()
     return roll >= ZombRand(1, 101)
 end
 
-function MoveableDoors.canTakeDoors(pl, door)
+--[[ function MoveableDoors.canTakeDoors(pl, door)
     if not MoveableDoors.hasSkills(pl) then return false end
     local reqKey = SandboxVars.MoveableDoors.MustHaveKey or false
     if reqKey and not MoveableDoors.haveDoorKey(door, pl) then return false end
-end
+end ]]
 
 function MoveableDoors.getMaxTime()
     local pl = getPlayer()
@@ -201,6 +202,7 @@ function MoveableDoors.hasSkills(pl)
     local MetalWeldingReqXP = SandboxVars.MoveableDoors.MetalWeldingReqXP or 3
     return WoodworkReqXP <= pl:getPerkLevel(Perks.Woodwork) and MetalWeldingReqXP <= pl:getPerkLevel(Perks.MetalWelding)
 end
+
 function MoveableDoors.haveDoorKey(door, pl)
     pl = pl or getPlayer()
     local KeyId = instanceof(door, "IsoDoor") and door:checkKeyId() or door:getKeyId()
@@ -228,17 +230,17 @@ function MoveableDoors.crowbar(pl)
 end
 
 function MoveableDoors.context(player, context, worldobjects, test)
-	local pl = getSpecificPlayer(player)
-	local sq = clickedSquare
-	if sq then
+    local pl = getSpecificPlayer(player)
+    local sq = clickedSquare
+    if sq then
         local door = MoveableDoors.getDoor(sq)
         if door then
             local optTip = context:addOptionOnTop(getText("ContextMenu_MoveableDoors_TakeDoor"), worldobjects, function()
                 if luautils.walkAdj(pl, sq) then
-                    --ISTimedActionQueue.add(ISWalkToTimedAction:new(pl, sq));
                     MoveableDoors.crowbar(pl)
                     local maxTime = MoveableDoors.getMaxTime()
-                    ISTimedActionQueue.add(MoveableDoorsAction:new(pl, door, door:getSquare(), maxTime));
+                    ISTimedActionQueue.add(MoveableDoorsAction:new(pl, door, door:getSquare(), maxTime))
+                    ISInventoryPage.dirtyUI();
                 end
                 getSoundManager():playUISound("UIActivateMainMenuItem")
             end)
@@ -246,42 +248,54 @@ function MoveableDoors.context(player, context, worldobjects, test)
             local tip = ISWorldObjectContextMenu.addToolTip()
             optTip.iconTexture = getTexture("media/ui/HodorIcon.png")
 
-            local hasCrowbar = pl:getPrimaryHandItem() ~= nil and pl:getInventory():FindAndReturn("Base.Crowbar")
+            local pr = pl:getPrimaryHandItem()
+            local hasCrowbar = pr and (pr:hasTag("Crowbar") or pr:getFullType() == "Base.Crowbar")
             local isGarageDoor = MoveableDoors.isGarageDoor(door)
-            local canTakeDoor = MoveableDoors.canTakeDoors(pl, door)
-            local isLock = door:isLocked()
+            local hasSkills =  MoveableDoors.hasSkills(pl)
+
+            local isLocked = door:isLocked() and not door:IsOpen()
+            local MustHaveKey = SandboxVars.MoveableDoors.MustHaveKey
+            local notAvailable = false
+            tip.description = getText("ContextMenu_MoveableDoors_TakeDoor")
+
+
+            tip:setTexture(sprName)
             if not hasCrowbar then
                 tip.description = getText("ContextMenu_MoveableDoors_Crowbar")
-                optTip.notAvailable = true
+                notAvailable = true
             end
-            local MustHaveKey = SandboxVars.MoveableDoors.MustHaveKey
-            if not MoveableDoors.haveDoorKey(door, pl) and MustHaveKey then
-                tip.description = (tip.description and tip.description.."\n" or "") .. getText("ContextMenu_MoveableDoors_ReqKey")
-                optTip.notAvailable = true
+
+            if MustHaveKey and not MoveableDoors.haveDoorKey(door, pl) then
+                tip.description = tip.description .. "\n" .. getText("ContextMenu_MoveableDoors_ReqKey")
+                notAvailable = true
             end
 
             if not isGarageDoor then
-                tip.description = (tip.description and tip.description.."\n" or "") .. getText("ContextMenu_MoveableDoors_GarageOnly")
-                optTip.notAvailable = true
+                tip.description = tip.description .. "\n" .. getText("ContextMenu_MoveableDoors_GarageOnly")
+                notAvailable = true
             end
 
-            if not isLock then
-                tip.description = (tip.description and tip.description.."\n" or "") .. getText("ContextMenu_MoveableDoors_Locked")
-                optTip.notAvailable = true
+            if isLocked then
+                tip.description = tip.description .. "\n" .. getText("ContextMenu_MoveableDoors_Locked")
+                notAvailable = true
             end
 
-            if not canTakeDoor then
-                tip.description = (tip.description and tip.description.."\n" or "") ..
-                    "Requires:\n Carpentry Level " .. SandboxVars.MoveableDoors.WoodworkReqXP ..
-                    "\n Metal Welding Level " .. SandboxVars.MoveableDoors.MetalWeldingReqXP
+            if not hasSkills then
+                tip.description = tip.description .. "\nRequires:\n Carpentry Level " ..
+                    SandboxVars.MoveableDoors.WoodworkReqXP ..
+                    "\n Metal Welding Level " ..
+                    SandboxVars.MoveableDoors.MetalWeldingReqXP
+                notAvailable = true
+            end
+            if notAvailable then
                 optTip.notAvailable = true
             end
 
             optTip.toolTip = tip
-
         end
-	end
+    end
 end
+
+
 Events.OnFillWorldObjectContextMenu.Remove(MoveableDoors.context)
 Events.OnFillWorldObjectContextMenu.Add(MoveableDoors.context)
-

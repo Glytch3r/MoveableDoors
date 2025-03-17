@@ -45,8 +45,7 @@ MoveableDoors = MoveableDoors or {}
         then copy the vanilla tiles pattern
 
  ]]
-
-function MoveableDoors.getAltFace(sprName, isGarage)
+ function MoveableDoors.getAltFace(sprName, isGarage)
     local doorParts = {}
     for part in string.gmatch(sprName, "([^_]+)") do
         table.insert(doorParts, part)
@@ -62,8 +61,13 @@ function MoveableDoors.getAltFace(sprName, isGarage)
         elseif col >= 3 and col <= 5 then
             doorParts[partsCount] = tostring(lastPart - 3)
         end
-    else --elseif isDouble then
-        if lastPart % 2 == 0 then
+    else
+        -- Specific swap for 17 <-> 20
+        if lastPart == 17 then
+            doorParts[partsCount] = "20"
+        elseif lastPart == 20 then
+            doorParts[partsCount] = "17"
+        elseif lastPart % 2 == 0 then
             doorParts[partsCount] = tostring(lastPart + 1)
         else
             doorParts[partsCount] = tostring(lastPart - 1)
@@ -94,6 +98,21 @@ function MoveableDoors.hasValidKeysInHands(pl)
     end
 end
 
+function MoveableDoors.isSquareFree(sq)
+    if not sq then return false end
+    if sq:getMovingObjects():size() > 0 then return false end
+    if sq:getStaticMovingObjects():size() > 0 then return false end
+    for i=0,sq:getObjects():size()-1 do
+        local obj = sq:getObjects():get(i)
+        if obj:getSprite() and not obj:getSprite():getProperties():Is(IsoFlagType.solidfloor) then
+            if obj:getType() == IsoObjectType.tree or obj:getType() == IsoObjectType.wall then
+                return false;
+            end
+            return not sq:isSolidTrans();
+        end
+    end
+    return true
+end
 function MoveableDoors.invContext(player, context, items)
     local pl = getSpecificPlayer(player)
     local isGarage = false
@@ -104,49 +123,37 @@ function MoveableDoors.invContext(player, context, items)
         local checkItem = type(item) == "table" and item.items[1] or (instanceof(item, "InventoryItem") and item or nil)
         if checkItem then
             local fType = checkItem:getFullType()
-            local KeyId = checkItem:getKeyId()
-            if fType then
-                if fType == "Base.GarageDoorPackage" then
-                    doorItem = checkItem
-                    isGarage = true
-                elseif fType == "Base.DoubleDoorPackage" then
-                    doorItem = checkItem
-                elseif MoveableDoors.isKey(fType) and MoveableDoors.hasValidKeysInHands(pl) and checkItem:getKeyId() == -1 then
-                    keyItem = checkItem
-                end
+            if fType == "Base.GarageDoorPackage" then
+                doorItem = checkItem
+                isGarage = true
+            elseif MoveableDoors.isKey(fType) and MoveableDoors.hasValidKeysInHands(pl) and checkItem:getKeyId() == -1 then
+                keyItem = checkItem
             end
         end
     end
-    local canChangeId = SandboxVars.MoveableDoors.CanChangeKeyId or true
-    if keyItem and (canChangeId or getCore():getDebug()) then
-        if MoveableDoors.hasValidKeysInHands(pl) then
-            local sc = pl:getSecondaryHandItem()
-            local pr = pl:getPrimaryHandItem()
 
-            local optCopyKeyLeft, optCopyKeyRight
+    local canChangeId = SandboxVars.MoveableDoors.CanChangeKeyId
+    if keyItem and (canChangeId or getCore():getDebug()) and MoveableDoors.hasValidKeysInHands(pl) then
+        local sc = pl:getSecondaryHandItem()
+        local pr = pl:getPrimaryHandItem()
 
-            if sc and sc:getKeyId() ~= -1 then
-                optCopyKeyLeft = context:addOptionOnTop(getText("ContextMenu_MoveableDoors_FromLeft"), nil, function()
-                    keyItem:setKeyId(sc:getKeyId())
-                end)
-            end
-
-
-            if pr and pr:getKeyId() ~= -1 then
-                optCopyKeyRight = context:addOptionOnTop(getText("ContextMenu_MoveableDoors_FromRight"), nil, function()
-                    keyItem:setKeyId(pr:getKeyId())
-                end)
-            end
-
-            if optCopyKeyLeft and sc and sc:getKeyId() == -1 then
+        if sc and sc:getKeyId() ~= -1 then
+            local optCopyKeyLeft = context:addOptionOnTop(getText("ContextMenu_MoveableDoors_FromLeft"), nil, function()
+                keyItem:setKeyId(sc:getKeyId())
+            end)
+            if sc:getKeyId() == -1 then
                 optCopyKeyLeft.notAvailable = true
                 local tip = ISInventoryPaneContextMenu.addToolTip()
                 tip.description = getText("ContextMenu_MoveableDoors_InvalidKey")
                 optCopyKeyLeft.toolTip = tip
             end
+        end
 
-
-            if optCopyKeyRight and pr and pr:getKeyId() == -1 then
+        if pr and pr:getKeyId() ~= -1 then
+            local optCopyKeyRight = context:addOptionOnTop(getText("ContextMenu_MoveableDoors_FromRight"), nil, function()
+                keyItem:setKeyId(pr:getKeyId())
+            end)
+            if pr:getKeyId() == -1 then
                 optCopyKeyRight.notAvailable = true
                 local tip = ISInventoryPaneContextMenu.addToolTip()
                 tip.description = getText("ContextMenu_MoveableDoors_InvalidKey")
@@ -154,24 +161,34 @@ function MoveableDoors.invContext(player, context, items)
             end
         end
     elseif doorItem then
-        local cap = isGarage and getText("ContextMenu_MoveableDoors_PlaceGarageDoor") or getText("ContextMenu_MoveableDoors_PlaceGarageDoor")
+        local cap = isGarage and getText("ContextMenu_MoveableDoors_PlaceGarageDoor") or getText("ContextMenu_MoveableDoors_PlaceDoubleDoor")
         context:addOptionOnTop(cap, nil, function()
             local sprName = MoveableDoors.getDoorItemSprName(doorItem)
             local altSprName = MoveableDoors.getAltFace(sprName, isGarage)
 
-
-            -----------------------            ---------------------------
             local function removeEvents()
                 Events.OnMouseUp.Remove(OnMouseUpCursor)
-                Events.OnKeyPressed.Remove(removeEvents)
-                Events.OnKeyKeepPressed.Remove(removeEvents)
-                Events.OnRightMouseDown.Remove(removeEvents)
-                --  cursor = nil
-                --getCell():setDrag(nil, 0)
-                ISInventoryPage.dirtyUI()
 
+                Events.OnRightMouseDown.Remove(removeEvents)
+                ISInventoryPage.dirtyUI()
                 ISMoveableCursor.exitCursorKey()
                 ISMoveableCursor.clearCacheForAllPlayers()
+            end
+
+            local function OnMouseUpCursor(x, y)
+                local testSq =  MoveableDoors.getPointer()
+                if testSq and MoveableDoors.isSquareFree(testSq) then
+                    if doorItem then
+                        local cont = doorItem:getContainer()
+                        if cont then
+                            if isClient() and not instanceof(doorItem:getOutermostContainer():getParent(), "IsoPlayer") and cont:getType() ~= "floor" and not cont:isInCharacterInventory(pl) then
+                                cont:removeItemOnServer(doorItem)
+                            end
+                            cont:DoRemoveItem(doorItem)
+                        end
+                    end
+                end
+                removeEvents()
             end
 
             local function setSprCursor()
@@ -179,40 +196,23 @@ function MoveableDoors.invContext(player, context, items)
                 local cursor = ISBrushToolTileCursor:new(sprName, altSprName, pl)
                 getCell():setDrag(cursor, pl:getPlayerNum())
 
-                local function OnMouseUpCursor(x, y)
-                    --cursor = nil
-                    if doorItem then
-                        local cont = doorItem:getContainer()
-                        if cont then
-                            cont:Remove(doorItem)
-
-                            if isClient() and not instanceof(doorItem:getOutermostContainer():getParent(), "IsoPlayer") and cont:getType()~="floor" then
-                                cont:removeItemOnServer(doorItem);
-                            end
-                            cont:getContainer():DoRemoveItem(doorItem);
-                        end
-                        removeEvents()
-                    end
-                end
                 Events.OnMouseUp.Add(OnMouseUpCursor)
-                Events.OnKeyPressed.Add(removeEvents);
-                Events.OnKeyKeepPressed.Add(removeEvents);
-                Events.OnRightMouseDown.Add(removeEvents);
 
-
-
+                Events.OnRightMouseDown.Add(removeEvents)
             end
 
             setSprCursor()
-
-
-            -----------------------            ---------------------------
-
         end)
     end
 end
+
 Events.OnFillInventoryObjectContextMenu.Remove(MoveableDoors.invContext)
 Events.OnFillInventoryObjectContextMenu.Add(MoveableDoors.invContext)
+
+-----------------------            ---------------------------
+
+
+
 -----------------------            ---------------------------
 
             --[[
